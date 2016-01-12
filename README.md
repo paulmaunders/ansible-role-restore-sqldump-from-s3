@@ -1,4 +1,4 @@
-Role Name
+restore-sqldump-from-s3
 =========
 
 This role can be used to download SQL dumps from S3, and to then decrypt, inflate and import them into a MySQL database.
