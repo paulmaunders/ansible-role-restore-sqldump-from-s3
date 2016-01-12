@@ -1,0 +1,12 @@
+---
+# defaults file for restore-sqldump-from-s3
+aws_access_key: changeme
+aws_secret_key: changeme
+s3_backup_url: s3://path/to/sqldumps
+gpg_secret_key: |
+  -----BEGIN PGP PRIVATE KEY BLOCK-----
+  Version: GnuPG/MacGPG2 v2.0.22 (Darwin)
+  Comment: GPGTools - https://gpgtools.org
+  
+  [...]
+  -----END PGP PUBLIC KEY BLOCK-----

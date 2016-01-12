@@ -1,0 +1,17 @@
+- name: Download s3cmd source
+  get_url: url=https://github.com/s3tools/s3cmd/archive/master.zip dest=~/s3cmd-master.zip
+
+- name: Ensure unzip is installed
+  yum: name=unzip state=present
+
+- name: Unarchive s3cmd source
+  unarchive: creates=~/s3cmd-master/setup.py src=~/s3cmd-master.zip dest=~/ copy=no
+
+- name: Install s3cmd
+  command: python ~/s3cmd-master/setup.py install
+  args:
+    chdir: ~/s3cmd-master/
+    creates: /usr/bin/s3cmd
+
+- name: Copy s3cfg
+  template: src=s3cfg.j2 dest=~/.s3cfg
