@@ -16,12 +16,24 @@
 - name: Make folder to store backups
   file: path=~/sql-dumps state=directory
 
+- name: Determine last file in S3 backups folder
+  shell: s3cmd ls {{s3_backup_url}}/ | tail -1 | grep -o '[^/]*sql.gz.gpg$'
+  register: s3_last_file
+  changed_when: false
+  tags: s3download  
+
+- debug: var=s3_last_file
+  tags: s3download
+
 - name: Download S3 backups
   command: s3cmd sync {{s3_backup_url}}/ ~/sql-dumps/
   args:
-    creates: ~/sql-dumps/wordpress.sql.gz.gpg
+    creates: ~/sql-dumps/{{ s3_last_file.stdout }}
   register: s3cmd
+  tags: s3download
+
 - debug: var=s3cmd.stdout_lines
+  tags: s3download  
 
 - name: Enumerate databases from backup files
   shell: find ~/sql-dumps -maxdepth 1 ! -name 'mysql.sql.gz.gpg' -name '*.sql.gz.gpg' -printf "%f\n" | sed s/.sql.gz.gpg$//
