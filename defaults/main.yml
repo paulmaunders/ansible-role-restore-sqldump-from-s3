@@ -3,6 +3,9 @@
 aws_access_key: changeme
 aws_secret_key: changeme
 s3_backup_url: s3://path/to/sqldumps
+# s3_databases:
+#   - database1
+#   - database2
 gpg_secret_key: |
   -----BEGIN PGP PRIVATE KEY BLOCK-----
   Version: GnuPG/MacGPG2 v2.0.22 (Darwin)

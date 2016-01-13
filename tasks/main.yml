@@ -2,6 +2,7 @@
 # tasks file for restore-sqldump-from-s3
 
 - include: s3cmd.yml
+  tags: s3download  
 
 - name: Copy across GPG secret key
   copy: content="{{gpg_secret_key}}" dest=~/sec-gpg.asc
@@ -16,13 +17,20 @@
 - name: Make folder to store backups
   file: path=~/sql-dumps state=directory
 
+- debug: var=s3_databases
+  tags: s3download
+
+# If s3_databases is not defined try to download them all
+
 - name: Determine last file in S3 backups folder
   shell: s3cmd ls {{s3_backup_url}}/ | tail -1 | grep -o '[^/]*sql.gz.gpg$'
   register: s3_last_file
   changed_when: false
+  when: s3_databases is not defined
   tags: s3download  
 
 - debug: var=s3_last_file
+  when: s3_databases is not defined
   tags: s3download
 
 - name: Download S3 backups
@@ -30,6 +38,18 @@
   args:
     creates: ~/sql-dumps/{{ s3_last_file.stdout }}
   register: s3cmd
+  when: s3_databases is not defined
+  tags: s3download
+
+# If s3_databases is defined and some databases are specified, download them one by one
+
+- name: Download S3 backups
+  command: s3cmd get {{s3_backup_url}}/{{item}}.sql.gz.gpg ~/sql-dumps/{{item}}.sql.gz.gpg
+  args:
+    creates: ~/sql-dumps/{{item}}.sql.gz.gpg
+  register: s3cmd
+  with_items: "{{ s3_databases }}"
+  when: s3_databases is defined
   tags: s3download
 
 - debug: var=s3cmd.stdout_lines

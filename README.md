@@ -16,6 +16,7 @@ The main variables required by this role are as follows:
 * aws_access_key - Your AWS access key
 * aws_secret_key - Your AWS secret key
 * s3_backup_url - The path to your S3 backups bucket. It assumes the bucket contains one file per database, with the filename as the database name, compressed with GZ and encrypted with GPG. Each filename should be of the format databasename.sql.gz.gpg 
+* s3_databases - An optional list of databases you wish to restore, specified without the sql.gz.gpg suffix. If this is not set the role will attempt to download every database in the S3 folder.
 * gpg_secret_key: - The GPG secret key that the backups are encrypted for.
 
 Dependencies
