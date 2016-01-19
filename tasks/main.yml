@@ -19,6 +19,7 @@
 
 - debug: var=s3_databases
   tags: s3download
+  when: s3_databases is defined  
 
 # If s3_databases is not defined try to download them all
 
@@ -33,7 +34,7 @@
   when: s3_databases is not defined
   tags: s3download
 
-- name: Download S3 backups
+- name: Download all S3 database backups
   command: s3cmd sync {{s3_backup_url}}/ ~/sql-dumps/
   args:
     creates: ~/sql-dumps/{{ s3_last_file.stdout }}
@@ -43,12 +44,12 @@
 
 # If s3_databases is defined and some databases are specified, download them one by one
 
-- name: Download S3 backups
+- name: Download individual S3 database backups
   command: s3cmd get {{s3_backup_url}}/{{item}}.sql.gz.gpg ~/sql-dumps/{{item}}.sql.gz.gpg
   args:
     creates: ~/sql-dumps/{{item}}.sql.gz.gpg
   register: s3cmd
-  with_items: "{{ s3_databases }}"
+  with_items: s3_databases
   when: s3_databases is defined
   tags: s3download
 
