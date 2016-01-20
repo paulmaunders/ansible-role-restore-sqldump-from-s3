@@ -17,6 +17,29 @@
 - name: Make folder to store backups
   file: path=~/sql-dumps state=directory
 
+# If s3_backup_url_parent is set, then use the most recent backup folder inside
+
+- debug: var=s3_backup_url_parent
+  tags: s3download
+
+- name: Determine latest S3 backups folder inside parent folder
+  shell: s3cmd ls {{s3_backup_url_parent.rstrip("/")}}/ | tail -1 | awk '{print $2}'
+  register: s3_backup_url_parent_result
+  changed_when: false
+  when: s3_backup_url_parent is defined
+  tags: s3download  
+
+- set_fact: s3_backup_url="{{s3_backup_url_parent_result.stdout}}"
+  when: s3_backup_url_parent is defined
+  tags: s3download
+
+# Strip trailing slash from s3_backup_url (if necessary) since we will set them explicitly when needed later
+- set_fact: s3_backup_url="{{s3_backup_url.rstrip("/")}}"
+  tags: s3download
+
+- debug: var=s3_backup_url
+  tags: s3download
+
 - debug: var=s3_databases
   tags: s3download
   when: s3_databases is defined  

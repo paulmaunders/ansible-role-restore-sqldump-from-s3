@@ -2,7 +2,8 @@
 # defaults file for restore-sqldump-from-s3
 aws_access_key: changeme
 aws_secret_key: changeme
-s3_backup_url: s3://path/to/sqldumps
+s3_backup_url: s3://path/to/date/sqldumps
+# s3_backup_url_parent: s3://path/to/sqldumps-parentfolder
 # s3_databases:
 #   - database1
 #   - database2
