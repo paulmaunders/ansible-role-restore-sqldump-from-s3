@@ -9,3 +9,4 @@ galaxy_info:
      - 7
   categories:
   - database:sql
+dependencies: []
