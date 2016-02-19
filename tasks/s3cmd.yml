@@ -1,6 +1,9 @@
 - name: Download s3cmd source
   get_url: url=https://github.com/s3tools/s3cmd/archive/master.zip dest=~/s3cmd-master.zip
 
+- name: Ensure python setup tools are installed
+  yum: name=python-setuptools state=present
+
 - name: Ensure unzip is installed
   yum: name=unzip state=present
 
