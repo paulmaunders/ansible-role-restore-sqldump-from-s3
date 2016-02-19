@@ -97,6 +97,22 @@
   with_items: "{{database_list.stdout_lines}}"
   tags: dbimport
 
+- name: Check which SQL dumps have already had their row format set
+  stat: path=~/sql-dumps/{{ item }}.row-format-set
+  register: database_list_row_format_status
+  with_items: "{{database_list.stdout_lines}}"
+  tags: dbimport
+
+- name: Set ROW_FORMAT if it is not previously defined to CREATE TABLE statements in SQL dumps
+  shell: perl -i -pe '/ROW_FORMAT=/ or s/ENGINE=InnoDB/ENGINE=InnoDB ROW_FORMAT={{ innodb_row_format }}/' ~/sql-dumps/{{ item.0 }}.sql && touch ~/sql-dumps/{{ item.0 }}.row-format-set
+  with_together:
+    - "{{database_list.stdout_lines}}"
+    - "{{database_list_row_format_status.results|map(attribute='stat.exists')|map('default','')|list}}"
+  when: >
+    (innodb_row_format is defined)
+    and (not item.1)
+  tags: dbimport 
+
 - name: Check which databases have already been imported
   stat: path=~/sql-dumps/{{ item }}.imported
   register: database_list_import_status
