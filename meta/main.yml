@@ -3,7 +3,7 @@ galaxy_info:
   author: Paul Maunders
   description: An ansible role to restore sql dumps from S3 into MySQL
   license: BSD
-  min_ansible_version: 2.0
+  min_ansible_version: 1.2
   platforms:
   - name: EL
     versions:

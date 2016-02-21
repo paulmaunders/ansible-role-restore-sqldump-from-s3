@@ -98,11 +98,19 @@
   tags: dbimport
 
 # NB: Ansible 1.9.4 uses \\\\1 whereas Ansible 2+ uses \\1 
-- name: Remove inserts from tables we wish to exclude
+- name: Remove inserts from tables we wish to exclude (Ansible 2+ backslash escaping)
   shell: "cat ~/sql-dumps/{{ item.keys() | first }}.sql | {{ item[item.keys() | first] | map(\"regex_replace\", \"^(.*)$\", \"sed '/INSERT INTO `\\1`/d'\") | join(\" 
 | \") }} > ~/sql-dumps/{{ item.keys() | first }}.sql.tmp && mv ~/sql-dumps/{{ item.keys() | first }}.sql.tmp ~/sql-dumps/{{ item.keys() | first }}.sql"
   with_items: exclude_inserts
-  when: exclude_inserts is defined 
+  when: exclude_inserts is defined and ansible_version.major|int >= 2
+  tags: dbimport
+  
+- name: Remove inserts from tables we wish to exclude (Ansible 1 backslash escaping)
+  shell: "cat ~/sql-dumps/{{ item.keys() | first }}.sql | {{ item[item.keys() | first] | map(\"regex_replace\", \"^(.*)$\", \"sed '/INSERT INTO `\\\\1`/d'\") | join(\"
+| \") }} > ~/sql-dumps/{{ item.keys() | first }}.sql.tmp && mv ~/sql-dumps/{{ item.keys() | first }}.sql.tmp ~/sql-dumps/{{ item.keys() | first }}.sql"
+  with_items: exclude_inserts
+  when: exclude_inserts is defined and ansible_version.major|int == 1 
+  tags: dbimport
 
 - name: Check which SQL dumps have already had their row format set
   stat: path=~/sql-dumps/{{ item }}.row-format-set
