@@ -58,7 +58,7 @@
   tags: s3download
 
 - name: Download all S3 database backups
-  command: s3cmd sync {{s3_backup_url}}/ ~/sql-dumps/
+  command: s3cmd --skip-existing --recursive get {{s3_backup_url}}/ ~/sql-dumps/
   args:
     creates: ~/sql-dumps/{{ s3_last_file.stdout }}
   register: s3cmd
@@ -90,8 +90,8 @@
   with_items: "{{database_list.stdout_lines}}"
   tags: dbimport
 
-- name: Decrypt and decompress SQL dumps
-  shell: gpg --decrypt ~/sql-dumps/{{ item }}.sql.gz.gpg | gunzip > ~/sql-dumps/{{ item }}.sql
+- name: Decrypt and decompress SQL dumps (also truncate original encrypted files)
+  shell: "(gpg --decrypt ~/sql-dumps/{{ item }}.sql.gz.gpg | gunzip > ~/sql-dumps/{{ item }}.sql) && : > ~/sql-dumps/{{ item }}.sql.gz.gpg"
   args:
     creates: ~/sql-dumps/{{ item }}.sql
   with_items: "{{database_list.stdout_lines}}"
@@ -134,8 +134,8 @@
   with_items: "{{database_list.stdout_lines}}"
   tags: dbimport
 
-- name: Import SQL dumps into MySQL
-  shell: mysql -D {{ item.0 }} < ~/sql-dumps/{{ item.0 }}.sql && touch ~/sql-dumps/{{ item.0 }}.imported 
+- name: Import SQL dumps into MySQL (and truncate original files)
+  shell: "mysql -D {{ item.0 }} < ~/sql-dumps/{{ item.0 }}.sql && touch ~/sql-dumps/{{ item.0 }}.imported && : > ~/sql-dumps/{{ item.0 }}.sql"
   with_together:
     - "{{database_list.stdout_lines}}"
     - "{{database_list_import_status.results|map(attribute='stat.exists')|map('default','')|list}}"
